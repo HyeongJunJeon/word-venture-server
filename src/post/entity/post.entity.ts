@@ -1,5 +1,12 @@
+import { Category } from 'src/category/entity/category.entity';
 import { BaseTable } from 'src/common/entity/base-table.entity';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Post extends BaseTable {
@@ -11,4 +18,11 @@ export class Post extends BaseTable {
 
   @Column()
   content: string;
+
+  @ManyToOne(() => Category, (category) => category.posts, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'category_id' })
+  category: Category;
 }

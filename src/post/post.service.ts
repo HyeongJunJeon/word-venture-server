@@ -18,11 +18,19 @@ export class PostService {
   }
 
   findAll(dto: GetPostDto) {
-    const { title } = dto;
+    const { title, categoryId } = dto;
 
     if (title) {
       return this.postRepository.find({
         where: { title: ILike(`%${title}%`) },
+        relations: ['category'],
+      });
+    }
+
+    if (categoryId) {
+      return this.postRepository.find({
+        where: { category: { id: categoryId } },
+        relations: ['category'],
       });
     }
 
@@ -30,7 +38,10 @@ export class PostService {
   }
 
   async findOne(id: number) {
-    const post = await this.postRepository.findOne({ where: { id } });
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: ['category'],
+    });
 
     if (!post) {
       throw new NotFoundException('존재하지 않는 게시글입니다.');
@@ -48,7 +59,10 @@ export class PostService {
 
     await this.postRepository.update(id, { ...updatePostDto });
 
-    const newPost = await this.postRepository.findOne({ where: { id } });
+    const newPost = await this.postRepository.findOne({
+      where: { id },
+      relations: ['category'],
+    });
 
     return newPost;
   }

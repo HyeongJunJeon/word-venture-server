@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import * as Joi from 'joi';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PostModule } from './post/post.module';
+import { CategoryModule } from './category/category.module';
+import { Category } from './category/entity/category.entity';
 import { CommonModule } from './common/common.module';
-import * as Joi from 'joi';
 import { Post } from './post/entity/post.entity';
+import { PostModule } from './post/post.module';
 
 @Module({
   imports: [
@@ -34,12 +36,13 @@ import { Post } from './post/entity/post.entity';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
         synchronize: true,
-        entities: [Post],
+        entities: [Post, Category],
       }),
       inject: [ConfigService],
     }),
     PostModule,
     CommonModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
