@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PostModule } from './post/post.module';
 import { CommonModule } from './common/common.module';
 import * as Joi from 'joi';
+import { Post } from './post/entity/post.entity';
 
 @Module({
   imports: [
@@ -32,8 +33,8 @@ import * as Joi from 'joi';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
-        entities: [],
         synchronize: true,
+        entities: [Post],
       }),
       inject: [ConfigService],
     }),
