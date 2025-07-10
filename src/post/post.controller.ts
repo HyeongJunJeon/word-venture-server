@@ -22,7 +22,7 @@ export class PostController {
     return this.postService.create(createPostDto);
   }
 
-  @Get()
+  @Get('')
   findAll(@Query() getPostDto: GetPostDto) {
     return this.postService.findAll(getPostDto);
   }

@@ -11,7 +11,7 @@ export interface Question {
 }
 
 export enum Level {
-  level1,
+  level1 = 1,
   level2,
   level3,
   level4,
