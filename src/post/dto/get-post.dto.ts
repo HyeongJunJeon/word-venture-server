@@ -1,4 +1,5 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Level } from '../type/post.type';
 
 export class GetPostDto {
   @IsOptional()
@@ -6,6 +7,10 @@ export class GetPostDto {
   title?: string;
 
   @IsOptional()
+  @IsEnum(Level)
+  level?: Level;
+
+  @IsOptional()
   @IsNumber()
-  categoryId?: number;
+  category_id?: number;
 }

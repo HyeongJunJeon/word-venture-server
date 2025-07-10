@@ -13,12 +13,19 @@ export class PostService {
     private postRepository: Repository<Post>,
   ) {}
 
-  create(createPostDto: CreatePostDto) {
-    return this.postRepository.save(createPostDto);
+  async create(createPostDto: CreatePostDto) {
+    const { category_id, ...postData } = createPostDto;
+
+    const post = this.postRepository.create({
+      ...postData,
+      category: { id: category_id },
+    });
+
+    return this.postRepository.save(post);
   }
 
   findAll(dto: GetPostDto) {
-    const { title, categoryId } = dto;
+    const { title, category_id, level } = dto;
 
     if (title) {
       return this.postRepository.find({
@@ -27,14 +34,23 @@ export class PostService {
       });
     }
 
-    if (categoryId) {
+    if (category_id) {
       return this.postRepository.find({
-        where: { category: { id: categoryId } },
+        where: { category: { id: category_id } },
         relations: ['category'],
       });
     }
 
-    return this.postRepository.find();
+    if (level) {
+      return this.postRepository.find({
+        where: { level },
+        relations: ['category'],
+      });
+    }
+
+    return this.postRepository.find({
+      relations: ['category'],
+    });
   }
 
   async findOne(id: number) {
@@ -57,7 +73,14 @@ export class PostService {
       throw new NotFoundException('존재하지 않는 게시글입니다.');
     }
 
-    await this.postRepository.update(id, { ...updatePostDto });
+    const { category_id, ...postData } = updatePostDto;
+
+    const updateData = {
+      ...postData,
+      ...(category_id && { category: { id: category_id } }),
+    };
+
+    await this.postRepository.update(id, updateData);
 
     const newPost = await this.postRepository.findOne({
       where: { id },
@@ -65,6 +88,23 @@ export class PostService {
     });
 
     return newPost;
+  }
+
+  async updateQuestionAnswer(id: number, questionAnswer: string) {
+    const post = await this.findOne(id);
+
+    if (!post) {
+      throw new NotFoundException('존재하지 않는 게시글입니다.');
+    }
+
+    await this.postRepository.update(id, {
+      questions: {
+        ...post.questions,
+        answer: questionAnswer,
+      },
+    });
+
+    return this.findOne(id);
   }
 
   async remove(id: number) {

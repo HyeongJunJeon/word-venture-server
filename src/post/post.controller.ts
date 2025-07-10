@@ -37,6 +37,14 @@ export class PostController {
     return this.postService.update(+id, updatePostDto);
   }
 
+  @Patch('/question/:id')
+  updateQuestionAnswer(
+    @Param('id') id: string,
+    @Body() questionAnswer: string,
+  ) {
+    return this.postService.updateQuestionAnswer(+id, questionAnswer);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.postService.remove(+id);

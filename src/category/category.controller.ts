@@ -7,39 +7,39 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { LangCategoryService } from './category.service';
-import { CreateLangCategoryDto } from './dto/create-lang_category.dto';
-import { UpdateLangCategoryDto } from './dto/update-lang_category.dto';
+import { CategoryService } from './category.service';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
-@Controller('lang-category')
-export class LangCategoryController {
-  constructor(private readonly langCategoryService: LangCategoryService) {}
+@Controller('category')
+export class CategoryController {
+  constructor(private readonly CategoryService: CategoryService) {}
 
   @Post()
-  create(@Body() createLangCategoryDto: CreateLangCategoryDto) {
-    return this.langCategoryService.create(createLangCategoryDto);
+  create(@Body() createCategoryDto: CreateCategoryDto) {
+    return this.CategoryService.create(createCategoryDto);
   }
 
   @Get()
   findAll() {
-    return this.langCategoryService.findAll();
+    return this.CategoryService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.langCategoryService.findOne(+id);
+    return this.CategoryService.findOne(+id);
   }
 
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateLangCategoryDto: UpdateLangCategoryDto,
+    @Body() UpdateCategoryDto: UpdateCategoryDto,
   ) {
-    return this.langCategoryService.update(+id, updateLangCategoryDto);
+    return this.CategoryService.update(+id, UpdateCategoryDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.langCategoryService.remove(+id);
+    return this.CategoryService.remove(+id);
   }
 }

@@ -1,3 +1,4 @@
+import { Expose } from 'class-transformer';
 import { Category } from 'src/category/entity/category.entity';
 import { BaseTable } from 'src/common/entity/base-table.entity';
 import {
@@ -7,17 +8,35 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Level, Question, Word } from '../type/post.type';
 
 @Entity()
 export class Post extends BaseTable {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Expose()
+  get postCreatedAt(): Date {
+    return this.createdAt;
+  }
+
+  @Column({ enum: Level, default: Level.level1 })
+  level: Level;
+
   @Column()
   title: string;
 
+  @Column({ type: 'jsonb' })
+  today_words: Word[];
+
+  @Column({ type: 'jsonb' })
+  learned_words: Word[];
+
   @Column()
-  content: string;
+  grammars_textArea: string;
+
+  @Column({ type: 'jsonb' })
+  questions: Question;
 
   @ManyToOne(() => Category, (category) => category.posts, {
     nullable: false,

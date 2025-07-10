@@ -1,26 +1,65 @@
-import { Injectable } from '@nestjs/common';
-import { CreateLangCategoryDto } from './dto/create-lang_category.dto';
-import { UpdateLangCategoryDto } from './dto/update-lang_category.dto';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+import { Category } from './entity/category.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
-export class LangCategoryService {
-  create(createLangCategoryDto: CreateLangCategoryDto) {
-    return 'This action adds a new langCategory';
+export class CategoryService {
+  constructor(
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
+  ) {}
+
+  async create(createCategoryDto: CreateCategoryDto) {
+    const { name } = createCategoryDto;
+
+    const category = await this.categoryRepository.findOne({ where: { name } });
+
+    if (category) {
+      throw new BadRequestException('이미 존재하는 카테고리입니다.');
+    }
+    return this.categoryRepository.save(createCategoryDto);
   }
 
   findAll() {
-    return `This action returns all langCategory`;
+    return this.categoryRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} langCategory`;
+  async findOne(id: number) {
+    const category = await this.categoryRepository.findOne({ where: { id } });
+
+    if (!category) {
+      throw new NotFoundException('존재하지 않는 카테고리입니다.');
+    }
+
+    return category;
   }
 
-  update(id: number, updateLangCategoryDto: UpdateLangCategoryDto) {
-    return `This action updates a #${id} langCategory`;
+  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+    const category = await this.findOne(id);
+
+    if (!category) {
+      throw new NotFoundException('존재하지 않는 카테고리입니다.');
+    }
+
+    await this.categoryRepository.update(id, updateCategoryDto);
+
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} langCategory`;
+  async remove(id: number) {
+    const category = await this.findOne(id);
+
+    if (!category) {
+      throw new NotFoundException('존재하지 않는 카테고리입니다.');
+    }
+
+    return this.categoryRepository.delete(id);
   }
 }
