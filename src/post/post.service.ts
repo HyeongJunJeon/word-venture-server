@@ -5,20 +5,32 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { GetPostDto } from './dto/get-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entity/post.entity';
+import { User } from 'src/user/entity/user.entity';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async create(createPostDto: CreatePostDto) {
-    const { category_id, ...postData } = createPostDto;
+    const { category_id, user_id, ...postData } = createPostDto;
+
+    const user = await this.userRepository.findOne({
+      where: { id: user_id },
+    });
+
+    if (!user) {
+      throw new NotFoundException('존재하지 않는 사용자입니다.');
+    }
 
     const post = this.postRepository.create({
       ...postData,
       category: { id: category_id },
+      user: { id: user_id },
     });
 
     return this.postRepository.save(post);
@@ -30,33 +42,33 @@ export class PostService {
     if (title) {
       return this.postRepository.find({
         where: { title: ILike(`%${title}%`) },
-        relations: ['category'],
+        relations: ['category', 'user'],
       });
     }
 
     if (category_id) {
       return this.postRepository.find({
         where: { category: { id: category_id } },
-        relations: ['category'],
+        relations: ['category', 'user'],
       });
     }
 
     if (level) {
       return this.postRepository.find({
         where: { level },
-        relations: ['category'],
+        relations: ['category', 'user'],
       });
     }
 
     return this.postRepository.find({
-      relations: ['category'],
+      relations: ['category', 'user'],
     });
   }
 
   async findOne(id: number) {
     const post = await this.postRepository.findOne({
       where: { id },
-      relations: ['category'],
+      relations: ['category', 'user'],
     });
 
     if (!post) {
@@ -84,7 +96,7 @@ export class PostService {
 
     const newPost = await this.postRepository.findOne({
       where: { id },
-      relations: ['category'],
+      relations: ['category', 'user'],
     });
 
     return newPost;

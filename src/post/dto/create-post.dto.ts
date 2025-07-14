@@ -71,4 +71,8 @@ export class CreatePostDto {
   @IsNotEmpty()
   @IsNumber()
   category_id: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  user_id: number;
 }

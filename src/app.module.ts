@@ -7,6 +7,7 @@ import { Category } from './category/entity/category.entity';
 import { CommonModule } from './common/common.module';
 import { Post } from './post/entity/post.entity';
 import { PostModule } from './post/post.module';
+import { User } from './user/entity/user.entity';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -39,7 +40,7 @@ import { UserModule } from './user/user.module';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
         synchronize: true,
-        entities: [Post, Category],
+        entities: [Post, Category, User],
       }),
       inject: [ConfigService],
     }),

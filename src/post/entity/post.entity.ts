@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Level, Question, Word } from '../type/post.type';
+import { User } from 'src/user/entity/user.entity';
 
 @Entity()
 export class Post extends BaseTable {
@@ -44,4 +45,10 @@ export class Post extends BaseTable {
   })
   @JoinColumn({ name: 'category_id' })
   category: Category;
+
+  @ManyToOne(() => User, (user) => user.createdPosts, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 }
