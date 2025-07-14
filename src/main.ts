@@ -11,9 +11,14 @@ async function bootstrap() {
     .setTitle('Word venture API')
     .setDescription('외국어 학습 앱 API입니다.')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, documentFactory);
+  SwaggerModule.setup('docs', app, documentFactory, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
