@@ -7,6 +7,7 @@ import { Category } from './category/entity/category.entity';
 import { CommonModule } from './common/common.module';
 import { Post } from './post/entity/post.entity';
 import { PostModule } from './post/post.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -23,6 +24,10 @@ import { PostModule } from './post/post.module';
         HASH_ROUND: Joi.number().required(),
         ACCESS_TOKEN_SECRET: Joi.string().required(),
         REFRESH_TOKEN_SECRET: Joi.string().required(),
+        KAKAO_JWT_SECRET: Joi.string().required(),
+        KAKAO_CLIENT_ID: Joi.string().required(),
+        KAKAO_CLIENT_SECRET: Joi.string().required(),
+        KAKAO_CALLBACK_URL: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -41,6 +46,7 @@ import { PostModule } from './post/post.module';
     PostModule,
     CommonModule,
     CategoryModule,
+    UserModule,
   ],
 })
 export class AppModule {}
