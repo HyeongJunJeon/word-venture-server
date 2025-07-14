@@ -6,7 +6,6 @@ import { User } from 'src/user/entity/user.entity';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { KakaoStrategy } from './strategy/kakao-strategy';
-import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { KakaoAuthGuard } from './guard/kakao-auth.guard';
 
 @Module({
@@ -16,7 +15,7 @@ import { KakaoAuthGuard } from './guard/kakao-auth.guard';
     TypeOrmModule.forFeature([User]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, KakaoStrategy, JwtAuthGuard, KakaoAuthGuard],
-  exports: [AuthService],
+  providers: [AuthService, KakaoStrategy, KakaoAuthGuard],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

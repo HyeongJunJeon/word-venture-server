@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
@@ -10,6 +15,9 @@ import { PostModule } from './post/post.module';
 import { User } from './user/entity/user.entity';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { BearerTokenMiddleware } from './auth/middleware/bearer-token.middleware';
+import { AuthGuard } from './auth/guard/auth.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -51,5 +59,17 @@ import { AuthModule } from './auth/auth.module';
     UserModule,
     AuthModule,
   ],
+  providers: [{ provide: APP_GUARD, useClass: AuthGuard }],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(BearerTokenMiddleware)
+      .exclude(
+        { path: 'auth/kakao', method: RequestMethod.GET },
+        { path: 'auth/kakao/callback', method: RequestMethod.GET },
+        { path: 'auth/reissue', method: RequestMethod.POST },
+      )
+      .forRoutes('*');
+  }
+}

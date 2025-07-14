@@ -55,11 +55,13 @@ export class AuthService {
             type,
           };
 
+    const secretKey =
+      type === 'access'
+        ? this.configService.get<string>(envVariableKeys.accessTokenSecret)
+        : this.configService.get<string>(envVariableKeys.refreshTokenSecret);
+
     return await this.jwtService.signAsync(payload, {
-      secret:
-        type === 'access'
-          ? this.configService.get<string>(envVariableKeys.accessTokenSecret)
-          : this.configService.get<string>(envVariableKeys.refreshTokenSecret),
+      secret: secretKey,
       expiresIn: type === 'access' ? '1h' : '30d',
     });
   }

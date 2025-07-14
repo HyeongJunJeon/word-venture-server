@@ -7,7 +7,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { KakaoAuthGuard } from './guard/kakao-auth.guard';
 
 interface RefreshTokenDto {
@@ -33,17 +32,5 @@ export class AuthController {
   @Post('reissue')
   async reissueToken(@Body() body: RefreshTokenDto) {
     return this.authService.reissueToken(body.refreshToken);
-  }
-
-  @Get('profile')
-  @UseGuards(JwtAuthGuard)
-  getProfile(@Request() req) {
-    return {
-      user: {
-        id: req.user.sub,
-        kakaoId: req.user.kakaoId,
-        nickname: req.user.nickname,
-      },
-    };
   }
 }
