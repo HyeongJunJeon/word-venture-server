@@ -9,6 +9,7 @@ import { Post } from './post/entity/post.entity';
 import { PostModule } from './post/post.module';
 import { User } from './user/entity/user.entity';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { UserModule } from './user/user.module';
     CommonModule,
     CategoryModule,
     UserModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

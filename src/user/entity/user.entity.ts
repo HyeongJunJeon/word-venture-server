@@ -13,6 +13,12 @@ export class User extends BaseTable {
   @Column()
   email: string;
 
+  @Column({ nullable: true })
+  kakaoId: string;
+
+  @Column({ nullable: true })
+  profileImage: string;
+
   @OneToMany(() => Post, (post) => post.user)
   createdPosts: Post[];
 }
