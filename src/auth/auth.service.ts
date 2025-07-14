@@ -42,30 +42,25 @@ export class AuthService {
     return user;
   }
 
-  async generateAccessToken(user: User): Promise<string> {
-    const payload = {
-      sub: user.id,
-      kakaoId: user.kakaoId,
-      nickname: user.nickname,
-    };
+  async generateToken(user: User, type: 'access' | 'refresh') {
+    const payload =
+      type === 'access'
+        ? {
+            sub: user.id,
+            kakaoId: user.kakaoId,
+            nickname: user.nickname,
+          }
+        : {
+            sub: user.id,
+            type,
+          };
 
     return await this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>(envVariableKeys.accessTokenSecret),
-      expiresIn: '1h',
-    });
-  }
-
-  async generateRefreshToken(user: User): Promise<string> {
-    const payload = {
-      sub: user.id,
-      type: 'refresh',
-    };
-
-    return await this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>(
-        envVariableKeys.refreshTokenSecret,
-      ),
-      expiresIn: '30d',
+      secret:
+        type === 'access'
+          ? this.configService.get<string>(envVariableKeys.accessTokenSecret)
+          : this.configService.get<string>(envVariableKeys.refreshTokenSecret),
+      expiresIn: type === 'access' ? '1h' : '30d',
     });
   }
 
@@ -97,7 +92,7 @@ export class AuthService {
 
   async reissueToken(refreshToken: string) {
     const user = await this.validateRefreshToken(refreshToken);
-    const newAccessToken = await this.generateAccessToken(user);
+    const newAccessToken = await this.generateToken(user, 'access');
 
     return {
       accessToken: newAccessToken,
@@ -105,8 +100,8 @@ export class AuthService {
   }
 
   async kakaoLogin(user: User) {
-    const accessToken = await this.generateAccessToken(user);
-    const refreshToken = await this.generateRefreshToken(user);
+    const accessToken = await this.generateToken(user, 'access');
+    const refreshToken = await this.generateToken(user, 'refresh');
 
     return {
       user: {
