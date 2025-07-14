@@ -46,13 +46,14 @@ export class AuthService {
     const payload =
       type === 'access'
         ? {
+            type,
             sub: user.id,
             kakaoId: user.kakaoId,
             nickname: user.nickname,
           }
         : {
-            sub: user.id,
             type,
+            sub: user.id,
           };
 
     const secretKey =

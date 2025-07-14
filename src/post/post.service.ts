@@ -16,11 +16,11 @@ export class PostService {
     private userRepository: Repository<User>,
   ) {}
 
-  async create(createPostDto: CreatePostDto) {
-    const { category_id, user_id, ...postData } = createPostDto;
+  async create(createPostDto: CreatePostDto, userId: number) {
+    const { category_id, ...postData } = createPostDto;
 
     const user = await this.userRepository.findOne({
-      where: { id: user_id },
+      where: { id: userId },
     });
 
     if (!user) {
@@ -30,59 +30,64 @@ export class PostService {
     const post = this.postRepository.create({
       ...postData,
       category: { id: category_id },
-      user: { id: user_id },
+      user: { id: userId },
     });
 
     return this.postRepository.save(post);
   }
 
-  findAll(dto: GetPostDto) {
+  findAll(dto: GetPostDto, userId: number) {
     const { title, category_id, level } = dto;
+    const baseWhere = { user: { id: userId } };
 
     if (title) {
       return this.postRepository.find({
-        where: { title: ILike(`%${title}%`) },
+        where: { ...baseWhere, title: ILike(`%${title}%`) },
         relations: ['category', 'user'],
       });
     }
 
     if (category_id) {
       return this.postRepository.find({
-        where: { category: { id: category_id } },
+        where: { ...baseWhere, category: { id: category_id } },
         relations: ['category', 'user'],
       });
     }
 
     if (level) {
       return this.postRepository.find({
-        where: { level },
+        where: { ...baseWhere, level },
         relations: ['category', 'user'],
       });
     }
 
     return this.postRepository.find({
+      where: baseWhere,
       relations: ['category', 'user'],
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId: number) {
     const post = await this.postRepository.findOne({
-      where: { id },
+      where: { id, user: { id: userId } },
       relations: ['category', 'user'],
     });
 
     if (!post) {
-      throw new NotFoundException('존재하지 않는 게시글입니다.');
+      throw new NotFoundException('포스트를 찾을 수 없거나 권한이 없습니다.');
     }
 
     return post;
   }
 
-  async update(id: number, updatePostDto: UpdatePostDto) {
-    const post = await this.findOne(id);
+  async update(id: number, updatePostDto: UpdatePostDto, userId: number) {
+    const post = await this.postRepository.findOne({
+      where: { id, user: { id: userId } },
+      relations: ['user'],
+    });
 
     if (!post) {
-      throw new NotFoundException('존재하지 않는 게시글입니다.');
+      throw new NotFoundException('포스트를 찾을 수 없거나 권한이 없습니다.');
     }
 
     const { category_id, ...postData } = updatePostDto;
@@ -102,11 +107,18 @@ export class PostService {
     return newPost;
   }
 
-  async updateQuestionAnswer(id: number, questionAnswer: string) {
-    const post = await this.findOne(id);
+  async updateQuestionAnswer(
+    id: number,
+    questionAnswer: string,
+    userId: number,
+  ) {
+    const post = await this.postRepository.findOne({
+      where: { id, user: { id: userId } },
+      relations: ['user'],
+    });
 
     if (!post) {
-      throw new NotFoundException('존재하지 않는 게시글입니다.');
+      throw new NotFoundException('포스트를 찾을 수 없거나 권한이 없습니다.');
     }
 
     await this.postRepository.update(id, {
@@ -116,14 +128,16 @@ export class PostService {
       },
     });
 
-    return this.findOne(id);
+    return this.findOne(id, userId);
   }
 
-  async remove(id: number) {
-    const post = await this.postRepository.findOne({ where: { id } });
+  async remove(id: number, userId: number) {
+    const post = await this.postRepository.findOne({
+      where: { id, user: { id: userId } },
+    });
 
     if (!post) {
-      throw new NotFoundException('존재하지 않는 게시글입니다.');
+      throw new NotFoundException('포스트를 찾을 수 없거나 권한이 없습니다.');
     }
 
     await this.postRepository.remove(post);
