@@ -23,6 +23,7 @@ import { APP_GUARD } from '@nestjs/core';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: ['.env.development', '.env.production'],
       validationSchema: Joi.object({
         ENV: Joi.string().required(),
         DB_TYPE: Joi.string().valid('postgres').required(),
@@ -50,7 +51,10 @@ import { APP_GUARD } from '@nestjs/core';
         database: configService.get<string>('DB_DATABASE'),
         synchronize: configService.get<string>('ENV') !== 'prod',
         entities: [Post, Category, User],
-        ssl: { rejectUnauthorized: false },
+        ssl:
+          configService.get<string>('ENV') === 'prod'
+            ? { rejectUnauthorized: false }
+            : undefined,
       }),
       inject: [ConfigService],
     }),
@@ -70,6 +74,7 @@ export class AppModule implements NestModule {
         { path: 'auth/kakao', method: RequestMethod.GET },
         { path: 'auth/kakao/callback', method: RequestMethod.GET },
         { path: 'auth/reissue', method: RequestMethod.POST },
+        { path: 'common/health', method: RequestMethod.GET },
       )
       .forRoutes('*');
   }

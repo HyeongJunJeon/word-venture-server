@@ -8,12 +8,9 @@ import {
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { KakaoAuthGuard } from './guard/kakao-auth.guard';
 import { Public } from './decorator/public.decorator';
-
-interface RefreshTokenDto {
-  refreshToken: string;
-}
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { KakaoAuthGuard } from './guard/kakao-auth.guard';
 
 @Controller('auth')
 export class AuthController {
