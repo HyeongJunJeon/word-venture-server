@@ -1,7 +1,8 @@
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Level } from '../type/post.type';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
-export class GetPostDto {
+export class GetPostDto extends PaginationDto {
   @IsOptional()
   @IsString()
   title?: string;

@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { GetPostDto } from './dto/get-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entity/post.entity';
 import { User } from 'src/user/entity/user.entity';
+import { CommonService } from 'src/common/common.service';
 
 @Injectable()
 export class PostService {
@@ -14,6 +15,7 @@ export class PostService {
     private postRepository: Repository<Post>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private commonService: CommonService,
   ) {}
 
   async create(createPostDto: CreatePostDto, userId: number) {
@@ -36,35 +38,43 @@ export class PostService {
     return this.postRepository.save(post);
   }
 
-  findAll(dto: GetPostDto, userId: number) {
-    const { title, category_id, level } = dto;
-    const baseWhere = { user: { id: userId } };
+  async findAll(dto: GetPostDto, userId: number) {
+    const { title, category_id, level, page, take } = dto;
+
+    const qb = this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.category', 'category')
+      .leftJoinAndSelect('post.user', 'user')
+      .where('post.user.id = :userId', { userId });
 
     if (title) {
-      return this.postRepository.find({
-        where: { ...baseWhere, title: ILike(`%${title}%`) },
-        relations: ['category', 'user'],
-      });
-    }
-
-    if (category_id) {
-      return this.postRepository.find({
-        where: { ...baseWhere, category: { id: category_id } },
-        relations: ['category', 'user'],
-      });
+      qb.andWhere('post.title ILIKE :title', { title: `%${title}%` });
     }
 
     if (level) {
-      return this.postRepository.find({
-        where: { ...baseWhere, level },
-        relations: ['category', 'user'],
+      qb.andWhere('post.level = :level', { level });
+    }
+
+    if (category_id) {
+      qb.andWhere('post.category.id = :categoryId', {
+        categoryId: category_id,
       });
     }
 
-    return this.postRepository.find({
-      where: baseWhere,
-      relations: ['category', 'user'],
-    });
+    qb.orderBy('post.createdAt', 'DESC');
+    this.commonService.applyPaginationParamsToQb(qb, { page, take });
+
+    const [posts, total] = await qb.getManyAndCount();
+    const totalPages = Math.ceil(total / take);
+
+    return {
+      data: posts,
+      total,
+      page,
+      take,
+      totalPages,
+      hasNext: page < totalPages,
+    };
   }
 
   async findOne(id: number, userId: number) {
